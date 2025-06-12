@@ -15,7 +15,7 @@ public class iBeautyFenster extends JFrame{
     private JPanel myPanel;
     private JLabel lbl_Slogan;
     private JLabel lbl_Name;
-    private JLabel lbl_Termin;
+    private JLabel lbl_Datum;
     private JLabel lbl_Telefon;
     private JLabel lbl_Dienste;
     private JLabel lbl_Angeboten;

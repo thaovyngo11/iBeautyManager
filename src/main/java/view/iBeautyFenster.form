@@ -130,14 +130,14 @@
         </constraints>
         <properties/>
       </component>
-      <component id="8a632" class="javax.swing.JLabel" binding="lbl_Termin">
+      <component id="8a632" class="javax.swing.JLabel" binding="lbl_Datum">
         <constraints>
           <grid row="8" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
           <gridbag top="0" left="20" bottom="0" right="0" weightx="0.0" weighty="1.0"/>
         </constraints>
         <properties>
           <foreground color="-14724962"/>
-          <text value="Termin"/>
+          <text value="Datum"/>
         </properties>
       </component>
       <component id="faa80" class="javax.swing.JTextField" binding="tf_Filtern">
