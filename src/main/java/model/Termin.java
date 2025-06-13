@@ -1,47 +1,52 @@
 package model;
 
-import java.time.LocalDate;
-import java.time.LocalTime;
 
+import java.time.LocalDateTime;
+import java.util.List;
+
+
+// Die Klasse Termin repräsentiert einen Termin mit Kundendaten, Angeboten und einem Zeitpunkt
 public class Termin {
+    // Attribute zur Speicherung von Kundendaten, Angebot und Datum/Zeit
     private String kundenname;
     private String telefonnummer;
-    private Dienst[] dienste;
-    private LocalDate datum;
-    private LocalTime uhrzeit;
+    private List<Dienst> angebot;
+    private LocalDateTime datumuhrzeit;
 
-    public Termin(String kundenname, String telefonnummer,Dienst[] dienste, LocalDate datum, LocalTime uhrzeit) {
+
+    // Attribute zur Speicherung von Kundendaten, Angebot und Datum/Zeit
+    public Termin(String kundenname, String telefonnummer,List<Dienst> angebot, LocalDateTime datumuhrzeit) {
         this.kundenname = kundenname;
         this.telefonnummer = telefonnummer;
-        this.dienste = dienste;
-        this.datum = datum;
-        this.uhrzeit = uhrzeit;
+        this.angebot = angebot;
+        this.datumuhrzeit = datumuhrzeit;
     }
 
+    // Getter-Methode für den Kundennamen
     public String getKundenname() {
         return kundenname;
     }
 
+    // Getter-Methode für die Telefonnummer
     public String getTelefonummer() {
         return telefonnummer;
     }
 
-    public Dienst[] getDienste() {
-        return dienste;
+    // Getter-Methode für das Angebot (Liste von Diensten)
+    public List<Dienst> getAngebot() {
+        return angebot;
     }
 
-    public LocalDate getdatum() {
-        return datum;
+    // Getter-Methode für Datum und Uhrzeit des Termins
+    public LocalDateTime getdatumuhrzeit() {
+        return datumuhrzeit;
     }
 
-    public LocalTime getUhrzeit(){
-        return uhrzeit;
-    }
-
+    // Methode zur Berechnung des Gesamtpreises aller Dienste im Angebot
     public double berechnenGesamtpreis(){
         double summe = 0;
-        for (Dienst d : dienste) {
-            summe += d.getPreis();
+        for (Dienst d : angebot) {
+            summe += d.getPreis(); // Preis jedes Dienstes wird zur Gesamtsumme addiert
         }
         return summe;
     }
