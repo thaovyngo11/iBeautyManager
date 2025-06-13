@@ -48,4 +48,26 @@ public class Dienst {
         this.preis = preis;
     }
 
+    public static String[] getAlleAngebote(){
+        return new String[] {
+
+                //Massage Angebote
+                "Tai Massage",
+                "Fuß Massage",
+                "Aromaöl Massage",
+
+                //Nägel Angebote
+                "Pediküre",
+                "Maniküre",
+                "Nagel Design",
+                "Nägel auffüllen",
+                "Nagelmodellage",
+
+                //Kosmetik Angebote
+                "Wimpernverlängerung",
+                "Augebrauen und Wimpern färben",
+                "Wimpernwelle",
+                "Augenbrauen zupfen"
+        };
+    }
 }
