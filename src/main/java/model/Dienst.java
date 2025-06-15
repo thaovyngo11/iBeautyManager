@@ -23,51 +23,41 @@ public class Dienst {
         return dienst;
     }
 
-    // Setter-Methode für den Dienstnamen
-    public void setDienst (String dienst) {
-        this.dienst = dienst;
-    }
 
     // Getter-Methode für das Angebot
     public String getAngebot (){
         return angebot;
     }
 
-    // Setter-Methode für das Angebot (Kategorie)
-    public void setAngebot (String Angebot) {
-        this.angebot = angebot;
-    }
 
     // Getter-Methode für den Preis
     public double getPreis(){
         return preis;
     }
 
-    // Setter-Methode für den Preis
-    public void setPreis (double preis) {
-        this.preis = preis;
-    }
 
-    public static String[] getAlleAngebote(){
-        return new String[] {
+    public static List<Dienst> getAlleDienstleistungen() {
+        List<Dienst> liste = new ArrayList<>();
 
-                //Massage Angebote
-                "Tai Massage",
-                "Fuß Massage",
-                "Aromaöl Massage",
+                //Massage
+                liste.add(new Dienst("Massage", "Thai Massage", 35.0));
+                liste.add(new Dienst("Massage","Fuß Massage", 40.0));
+                liste.add(new Dienst("Massage", "Aromaöl Massage", 25.0));
 
-                //Nägel Angebote
-                "Pediküre",
-                "Maniküre",
-                "Nagel Design",
-                "Nägel auffüllen",
-                "Nagelmodellage",
+                //Nägel
+                liste.add(new Dienst("Nägel", "Pediküre", 20.0));
+                liste.add(new Dienst("Nägel","Maniküre", 10.0));
+                liste.add(new Dienst("Nägel", "Nagel Design", 30.0));
+                liste.add(new Dienst("Nägel","Nägel auffüllen", 28.0));
+                liste.add(new Dienst("Nägel","Nagelmodellage", 30.4));
 
                 //Kosmetik Angebote
-                "Wimpernverlängerung",
-                "Augebrauen und Wimpern färben",
-                "Wimpernwelle",
-                "Augenbrauen zupfen"
-        };
+                liste.add(new Dienst("Kosmetik","Wimpernverlängerung", 80.0));
+                liste.add(new Dienst("Kosmetik", "Augebrauen und Wimpern färben", 15.0));
+                liste.add(new Dienst("Kosmetik","Wimpernwelle", 69.0));
+                liste.add(new Dienst("Kosmetik", "Augenbrauen zupfen", 15.0));
+
+                return liste;
+        }
     }
 }
