@@ -5,53 +5,65 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 
-// Die Klasse Termin repräsentiert einen Termin mit Kundendaten, Angeboten und einem Zeitpunkt
 public class Termin {
-    // Attribute zur Speicherung von Kundendaten, Angebot und Datum/Zeit
-    private String kundenname;
+
+    /* Die Klasse "Termin" beschreibt einen Termin im System.
+       Ein Termin besteht aus: Kundenname, Telefonnummer, Liste von Diensten, Datum und Uhrzeit. */
+
+    // ATTRIBUTE
+
+    public String kundenname;
     private String telefonnummer;
-    private List<Dienst> angebot;
-    private LocalDateTime datumuhrzeit;
+    private List<Dienst> dienstList;
+    private LocalDateTime datum;
 
+    // KONSTRUKTOR
 
-    // Attribute zur Speicherung von Kundendaten, Angebot und Datum/Zeit
-    public Termin(String kundenname, String telefonnummer,List<Dienst> angebot, LocalDateTime datumuhrzeit) {
+    public Termin(String kundenname, String telefonnummer, List<Dienst> angebot, LocalDateTime datum) {
         this.kundenname = kundenname;
         this.telefonnummer = telefonnummer;
-        this.angebot = angebot;
-        this.datumuhrzeit = datumuhrzeit;
+        this.dienstList = angebot;
+        this.datum = datum;
+
     }
 
-    // Getter-Methode für den Kundennamen
+    // GETTER-METHODEN
+
     public String getKundenname() {
+
         return kundenname;
     }
 
-    // Getter-Methode für die Telefonnummer
-    public String getTelefonummer() {
+    public String getTelefonnummer() {
+
         return telefonnummer;
     }
 
-    // Getter-Methode für das Angebot (Liste von Diensten)
-    public List<Dienst> getAngebot() {
-        return angebot;
+    public List<Dienst> getDienstList() {
+
+        return dienstList;
     }
 
-    // Getter-Methode für Datum und Uhrzeit des Termins
-    public LocalDateTime getdatumuhrzeit() {
-        return datumuhrzeit;
+    public LocalDateTime getDatum() {
+
+        return datum;
     }
 
-    // Methode zur Berechnung des Gesamtpreises aller Dienste im Angebot
-    public double berechnenGesamtpreis(){
-        double summe = 0;
-        for (Dienst d : angebot) {
-            summe += d.getPreis(); // Preis jedes Dienstes wird zur Gesamtsumme addiert
+    // METHODEN ZUR VERARBEITUNG
+
+    /* Berechnet den Gesamtpreis des Termins (die Summe aller gewählten Dienstleistungen)
+
+       Wir gehen die Liste mit einer for-each-Schleife durch und zählen die Preise zusammen.
+
+       Zum Beispiel:
+       Wenn 3 Dienste gebucht wurden mit Preisen 25.0, 15.0, 40.0 → ergibt sich Gesamtpreis = 80.0 */
+
+    public double getGesamtpreis() {
+        double summe = 0.0;
+        for (Dienst d : dienstList) {
+            summe = summe + d.getPreis();
         }
         return summe;
     }
-
-
-
 
 }
