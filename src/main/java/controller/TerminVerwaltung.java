@@ -1,20 +1,23 @@
 package controller;
 
 
-    import model.Dienst;
-    import model.Termin;
-    import java.util.ArrayList;
-    import java.util.List;
-    import java.time.LocalDateTime;
+import model.Dienst;
+import model.Termin;
+
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
 
 
 public class TerminVerwaltung {
 
-        private List<Termin> termine;
+        private static List<Termin> termine;
 
         // Konstruktor
         public TerminVerwaltung() {
             termine = new ArrayList<>();
+            initObjekte();
         }
 
         // Termin hinzufügen
@@ -43,28 +46,35 @@ public class TerminVerwaltung {
             return gefiltert;
         }
 
-        // Beispielobjekte erstellen
-        public static List<Dienst> getAlleAngebot() {
-            List<model.Dienst> angebot = new ArrayList<>();
 
-            // Dienstobjekte
-            Dienst massage = new Dienst("Massage", "Thai-Massage", 35.0);
-            Dienst naegel = new Dienst("Nägel", "Mani- und Pediküre", 30.0);
-            Dienst kosmetik = new Dienst("Kosmetik", "Wimpern- & Augenbrauen färben",15.0);
+        public void initObjekte() {
+        List<Dienst> angebot1 = new ArrayList<>();
 
-            // Terminobjekte mit beispielhaften Daten
-            Termin emma = new Termin("Emma Schmidt", "0123456789", "Thai-Massage",);
-            Termin jule = new Termin("Jule Müller", "0187654321", "Mani- und Pediküre",);
-            Termin lena = new Termin("Lena Baumann", "0152223332","Wimpern- und Augenbrauenfärben",);
+        angebot1.add(new Dienst("Massage", "Thai Massage", 35.0));
 
+        Termin t1 = new Termin("Büsra", "015203793261", angebot1,
+                LocalDateTime.of(2025, 5, 17, 10, 0 )
+        );
+        termine.add(t1);
 
-            // Termine zur Liste hinzufügen
-            terminHinzufuegen(emma);
-            terminHinzufuegen(jule);
-            terminHinzufuegen(lena);
-        }
+        List<Dienst> angebot2 = new ArrayList<>();
+
+        angebot2.add(new Dienst("Nägel", "Pediküre", 20.0));
+        angebot2.add(new Dienst("Nägel", "Nagel Design", 30.0));
+
+        Termin t2 = new Termin("Thao Vy", "015209922581", angebot2,
+                LocalDateTime.of(2025, 5, 31, 9, 30 )
+        );
+        termine.add(t2);
+
+        List<Dienst> angebot3 = new ArrayList<>();
+
+        angebot3.add(new Dienst("Kosmetik", "Wimpernverlängerung", 80.0));
+        angebot3.add(new Dienst("Nägel", "Nägel auffüllen", 28.0));
+
+        Termin t3 = new Termin("Lara", "015202618469", angebot3,
+                LocalDateTime.of(2025, 6, 2, 15, 20 )
+        );
+        termine.add(t3);
     }
-
-
-
 }
