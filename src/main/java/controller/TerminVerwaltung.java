@@ -1,6 +1,5 @@
 package controller;
 
-
 import model.Dienst;
 import model.Termin;
 
@@ -8,46 +7,37 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-
-
 public class TerminVerwaltung {
 
-        private static List<Termin> termine;
+    /* Die Klasse funktioniert wie eine Verwaltungszentrale für alle gebuchten Termine:
+       Sie ist für das Speichern, Abrufen und Filtern von Terminen zuständig. */
 
-        // Konstruktor
-        public TerminVerwaltung() {
-            termine = new ArrayList<>();
-            initObjekte();
-        }
+    // ATTRIBUTE
+    private static List<Termin> termine = new ArrayList<>();
 
-        // Termin hinzufügen
-        public boolean terminHinzufuegen(Termin termin) {
-            return termine.add(termin);
-        }
+    public TerminVerwaltung() {
 
-        // Termin löschen
-        public boolean terminLoeschen(Termin termin) {
-            return termine.remove(termin);
-        }
+    }
 
-        // Alle Termine abrufen
-        public List<Termin> getAlleTermine() {
-            return new ArrayList<>(termine);
-        }
+    public void addTermin(Termin termin) {
+        termine.add(termin);
+    }
 
-        // Nach Telefonnummer filtern
-        public List<Termin> filterNachTelefon(String telefonnummer) {
-            List<Termin> gefiltert = new ArrayList<>();
-            for (Termin t : termine) {
-                if (t.getTelefonnummer().equals(telefonnummer)) {
-                    gefiltert.add(t);
-                }
+    public List<Termin> getAlleTermine() {
+        return new ArrayList<>(termine);
+    }
+
+    public List<Termin> filterNachTelefon(String telefonnummer) {
+        List<Termin> gefiltert = new ArrayList<>();
+        for (Termin t : termine) {
+            if (t.getTelefonnummer().equalsIgnoreCase(telefonnummer)) {
+                gefiltert.add(t);
             }
-            return gefiltert;
         }
+        return gefiltert;
+    }
 
-
-        public void initObjekte() {
+    public void initObjekte() {
         List<Dienst> angebot1 = new ArrayList<>();
 
         angebot1.add(new Dienst("Massage", "Thai Massage", 35.0));
@@ -78,3 +68,4 @@ public class TerminVerwaltung {
         termine.add(t3);
     }
 }
+
