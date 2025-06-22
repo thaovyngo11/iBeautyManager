@@ -36,27 +36,12 @@ public class Dienst {
         return dienst;
     }
 
-    public void setDienst(String dienst) {
-
-        this.dienst = dienst;
-    }
-
     public String getAngebot (){
         return angebot;
     }
 
-    public void setAngebot(String angebot) {
-
-        this.angebot = angebot;
-    }
-
     public double getPreis(){
         return preis;
-    }
-
-    public void setPreis(double preis) {
-
-        this.preis = preis;
     }
 
     /* METHODE:
