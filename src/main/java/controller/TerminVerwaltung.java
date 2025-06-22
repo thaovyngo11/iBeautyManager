@@ -19,15 +19,15 @@ public class TerminVerwaltung {
 
     }
 
-    public void addTermin(Termin termin) {
+    public static void addTermin(Termin termin) {
         termine.add(termin);
     }
 
-    public List<Termin> getAlleTermine() {
+    public static List<Termin> getAlleTermine() {
         return new ArrayList<>(termine);
     }
 
-    public List<Termin> filterNachTelefon(String telefonnummer) {
+    public static List<Termin> filterNachTelefon(String telefonnummer) {
         List<Termin> gefiltert = new ArrayList<>();
         for (Termin t : termine) {
             if (t.getTelefonnummer().equalsIgnoreCase(telefonnummer)) {
@@ -37,13 +37,14 @@ public class TerminVerwaltung {
         return gefiltert;
     }
 
-    public void initObjekte() {
+    public static void initObjekte() {
+        termine.clear();
         List<Dienst> angebot1 = new ArrayList<>();
 
         angebot1.add(new Dienst("Massage", "Thai Massage", 35.0));
 
         Termin t1 = new Termin("Büsra", "015203793261", angebot1,
-                LocalDateTime.of(2025, 5, 17, 10, 0 )
+                LocalDateTime.of(2025, 5, 17, 10, 0)
         );
         termine.add(t1);
 
@@ -53,7 +54,7 @@ public class TerminVerwaltung {
         angebot2.add(new Dienst("Nägel", "Nagel Design", 30.0));
 
         Termin t2 = new Termin("Thao Vy", "015209922581", angebot2,
-                LocalDateTime.of(2025, 5, 31, 9, 30 )
+                LocalDateTime.of(2025, 5, 31, 9, 30)
         );
         termine.add(t2);
 
@@ -63,9 +64,9 @@ public class TerminVerwaltung {
         angebot3.add(new Dienst("Nägel", "Nägel auffüllen", 28.0));
 
         Termin t3 = new Termin("Lara", "015202618469", angebot3,
-                LocalDateTime.of(2025, 6, 2, 15, 20 )
+                LocalDateTime.of(2025, 6, 2, 15, 20)
         );
         termine.add(t3);
     }
-}
 
+}
