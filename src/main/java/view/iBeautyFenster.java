@@ -11,118 +11,107 @@ import javax.swing.table.TableCellRenderer;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.Date;
+import java.time.*;
+import java.util.*;
 import java.util.List;
-import java.util.Locale;
 
-public class iBeautyFenster extends JFrame{
+public class iBeautyFenster extends JFrame {
 
-    // -------------//
-    // 1. ATTRIBUTE //
-    // -------------//
+    // ----------------------------- //
+    // 1. ATTRIBUTE: GUI-KOMPONENTEN //
+    // ----------------------------- //
 
-    // GUI-Komponenten
     private JPanel myPanel;
     private JLabel lbl_slogan;
     private JLabel lbl_KundenName;
     private JLabel lbl_Telefonnummer;
-    private JTextField tf_Kundenname;
-    private JTextField tf_Telefonnummer;
-
     private JLabel lbl_Dienste;
     private JLabel lbl_Angeboten;
+
+    private JTextField tf_Kundenname;
+    private JTextField tf_Telefonnummer;
+    private JTextField tf_Gesamtpreis;
+    private JTextField tf_Filtern;
+
     private JCheckBox chk_Dienst1;
     private JCheckBox chk_Dienst2;
     private JCheckBox chk_Dienst3;
+
     private JComboBox cbx_Angebot1;
     private JComboBox cbx_Angebot2;
     private JComboBox cbx_Angebot3;
 
-    private JTextField tf_Gesamtpreis;
-    private JButton btn_Berechnen;
-
     private JLabel lbl_Datum;
-    private JPanel panelDatum;
     private JLabel lbl_Uhrzeit;
+    private JPanel panelDatum;
     private JSpinner spn_Uhrzeit;
 
+    private JButton btn_Berechnen;
     private JButton btn_Speichern_und_Anzeigen;
-
-    private JTextField tf_Filtern;
     private JButton btn_Filtern;
 
     private JScrollPane scp_Termin_Uebersicht;
     private JTable tb_Termin_Uebersicht;
 
-    // Spezial-Komponenten: JDateChooser & TableModel (nicht über GUI-Designer erstellt)
-    private JDateChooser dateChooser;
+    private JDateChooser dateChooser;                              // JDateChooser & TableModel (nicht über GUI-Designer erstellt)
     private DefaultTableModel tableModel;
+    private TerminVerwaltung verwaltung = new TerminVerwaltung();  // Speichert und verwaltet alle Termine in der App
+    private boolean initialisiert = false;                         // Kontrollvariable: true = Termine wurden schon geladen, false = noch nicht geladen
 
-    // Ein Objekt zur Verwaltung und Speicherung aller Termine
-    private TerminVerwaltung verwaltung = new TerminVerwaltung();
-
-    /* Eine Kontrollvariable zu anzeigen, ob Daten von einem Termin schon einmal geladen wurden
-     - "false" - Daten werden geladen.
-     - "true" - Daten sind bereits vorhanden, also wird nichts mehr gemacht. */
-    private boolean initialisiert = false;
-
-    // -----------------------------------------//
-    // 2. KONSTRUKTOR – INITIALISIERUNG DER GUI //
-    // -----------------------------------------//
+    // ------------------------------------- //
+    // 2. KONSTRUKTOR: GUI INITIALISIEREN    //
+    // ------------------------------------- //
 
     public iBeautyFenster() {
-        setTitle("iBeauty Manager");                     // Setzt den Titel des Fensters
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);  // Bestimmt das Verhalten beim Schließen des Fensters
-        setExtendedState(JFrame.MAXIMIZED_BOTH);         // Startet die Anwendung im Vollbildmodus
-        setContentPane(myPanel);                         // Setzt das Haupt-Panel als Inhalt des Fensters
-        setVisible(true);                                // Zeigt das Fenster an
 
-        // -----------------------------------------//
-        // 3. DATUM, UHRZEIT UND TABELLE EINRICHTEN //
-        // -----------------------------------------//
+            setTitle("iBeauty Manager");                     // Đặt tên tiêu đề cửa sổ
+            setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);  // Khi nhấn dấu “X” đóng cửa sổ, chương trình sẽ thoát
+            setExtendedState(JFrame.MAXIMIZED_BOTH);         // Cửa sổ mở toàn màn hình
+            setContentPane(myPanel);                         // Dùng myPanel đã thiết kế trong GUI Designer làm nội dung chính.
+            setVisible(true);                                // Hiển thị cửa sổ (bắt buộc để thấy giao diện)
 
-        // DATUM //
+        setupDatum_Uhrzeit_Tabelle();    // Datum, Uhrzeit und Tabelle vorbereiten
+        setupActionListener_Berechnen(); // ActionListener für "Berechnen"-Button
+        setupActionListener_Speichern(); // ActionListener für "Speichern"-Button
+        setupActionListener_Filtern();   // ActionListener für "Filtern"-Button
+        ladeInitialTermine();            // Beispieltermine laden und anzeigen
+    }
 
-        Locale.setDefault(Locale.GERMANY);                                   // Sprache und Format auf Deutsch festlegen
-        dateChooser = new JDateChooser();                                    // JDateChooser-Objekt initialisieren (Kalenderfeld)
-        dateChooser.setPreferredSize(new Dimension(150, 25));   // Größe des Datumswählers festlegen
-        panelDatum.setLayout(new FlowLayout(FlowLayout.LEFT));               // Layout des Panels auf FlowLayout setzen
-        panelDatum.add(dateChooser);                                         // Datumswähler zum Panel hinzufügen
+    // ------------------------------------------ //
+    // 3. KONSTRUKTOR: DATUM - UHRZEIT - TABELLE  //
+    // ------------------------------------------ //
 
-        // UHRZEIT //
+    private void setupDatum_Uhrzeit_Tabelle() {
 
-        spn_Uhrzeit.setModel(new SpinnerDateModel());                                          // SpinnerDateModel: Uhrzeit initialisieren
-        spn_Uhrzeit.setEditor(new JSpinner.DateEditor(spn_Uhrzeit, "HH:mm"));  // setEditor(...): Anzeigeformat für Uhrzeit festlegen (z.B.: 10:30)
+        Locale.setDefault(Locale.GERMANY);                                  // Sprache und Format auf Deutsch festlegen
+        dateChooser = new JDateChooser();                                   // JDateChooser-Objekt initialisieren (Kalenderfeld)
+        dateChooser.setPreferredSize(new Dimension(150, 25));  // Größe des Datumswählers festlegen
+        panelDatum.setLayout(new FlowLayout(FlowLayout.LEFT));              // Layout des Panels auf FlowLayout setzen
+        panelDatum.add(dateChooser);
 
-        // TABELLE //
+        spn_Uhrzeit.setModel(new SpinnerDateModel());                                           // SpinnerDateModel: Uhrzeit initialisieren
+        spn_Uhrzeit.setEditor(new JSpinner.DateEditor(spn_Uhrzeit, "HH:mm"));   // setEditor(...): Anzeigeformat für Uhrzeit festlegen (z.B.: 10:30)
 
-        tableModel = new DefaultTableModel(new String[]{"Kundenname", "Telefonnummer", "Dienst", "Preis", "Datum"}, 0) {   // Erstellen eines Tabellenmodells mit Spaltenüberschriften und initial 0 Zeilen (leere Tabelle)
+        tableModel = new DefaultTableModel(
+                new String[]{"Kundenname", "Telefonnummer", "Dienst", "Preis", "Datum"}, 0) { // Erstellen eines Tabellenmodells mit Spaltenüberschriften und initial 0 Zeilen (leere Tabelle)
             @Override
-            public boolean isCellEditable(int row, int column) {  // Überschreibt die Methode isCellEditable, um die Bearbeitung der Zellen zu verhindern (immer false zurückgeben)
+            public boolean isCellEditable(int row, int column) { // Überschreibt die Methode isCellEditable, um die Bearbeitung der Zellen zu verhindern (immer false zurückgeben)
 
                 return false;
             }
         };
 
-        tb_Termin_Uebersicht.setModel(tableModel);    // Weist das erstellte TableModel der Tabelle zu
+        tb_Termin_Uebersicht.setModel(tableModel); // Weist das erstellte TableModel der Tabelle zu
 
-        int[] widths = {90, 110, 200, 60, 270};       // Ein Array mit gewünschten Spaltenbreiten (in Pixeln)
-        for (int i = 0; i < widths.length; i++) {     // Schleife, um jede Spalte der Tabelle anzupassen
+        int[] widths = {90, 110, 200, 60, 270};    // Ein Array mit gewünschten Spaltenbreiten (in Pixeln)
+        for (int i = 0; i < widths.length; i++) {  // Schleife, um jede Spalte der Tabelle anzupassen
 
-            tb_Termin_Uebersicht.getColumnModel().getColumn(i).setPreferredWidth(widths[i]);  // Breite setzen
-            tb_Termin_Uebersicht.getColumnModel().getColumn(i).setMinWidth(widths[i]);        // Minimale Breite verhindern, dass Spalte kleiner wird
-            tb_Termin_Uebersicht.getColumnModel().getColumn(i).setMaxWidth(widths[i]);        // Maximale Breite verhindern, dass Spalte breiter wird
-            tb_Termin_Uebersicht.getColumnModel().getColumn(i).setResizable(false);           // Benutzer darf die Spaltenbreite nicht per Maus verändern
-
+            tb_Termin_Uebersicht.getColumnModel().getColumn(i).setPreferredWidth(widths[i]); // Breite setzen
+            tb_Termin_Uebersicht.getColumnModel().getColumn(i).setMinWidth(widths[i]);       // Minimale Breite verhindern, dass Spalte kleiner wird
+            tb_Termin_Uebersicht.getColumnModel().getColumn(i).setMaxWidth(widths[i]);       // Maximale Breite verhindern, dass Spalte breiter wird
+            tb_Termin_Uebersicht.getColumnModel().getColumn(i).setResizable(false);          // Benutzer darf die Spaltenbreite nicht per Maus verändern
         }
-
-        tb_Termin_Uebersicht.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);           // Nur eine Zeile darf gleichzeitig ausgewählt werden
-
+        tb_Termin_Uebersicht.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);                               // Nur eine Zeile darf gleichzeitig ausgewählt werden
         tb_Termin_Uebersicht.getColumnModel().getColumn(2).setCellRenderer(new TableCellRenderer() {  // Weist der dritten Spalte "Dienst" einen benutzerdefinierten CellRenderer zu
 
             @Override
@@ -143,273 +132,210 @@ public class iBeautyFenster extends JFrame{
                     area.setForeground(table.getForeground());           // Standard-Textfarbe verwenden
                 }
 
-                int preferredHeight = area.getPreferredSize().height; // getPreferredSize().height: nötige Höhe berechnen, um den ganzen Text anzuzeigen
+                int preferredHeight = area.getPreferredSize().height;    // getPreferredSize().height: nötige Höhe berechnen, um den ganzen Text anzuzeigen
 
-                if (table.getRowHeight(row) != preferredHeight) {     // Wenn die aktuelle Zeilenhöhe unpassend ist
-                    table.setRowHeight(row, preferredHeight);         // Zeilenhöhe entsprechend anpassen
+                if (table.getRowHeight(row) != preferredHeight) {        // Wenn die aktuelle Zeilenhöhe unpassend ist
+                    table.setRowHeight(row, preferredHeight);            // Zeilenhöhe entsprechend anpassen
                 }
                 return area;
             }
         });
+    }
 
-        // ---------------------------------------------------//
-        // 4. ACTIONLISTENER:  BERECHNEN, SPEICHERN & FILTERN //
-        // ---------------------------------------------------//
+    // ---------------------------- //
+    // 4. ACTIONLISTENER: Berechnen //
+    // ---------------------------- //
 
-        // BERECHNEN //
+    // Hilfsmethode zur Preisberechnung
+    // Prüft, welche Dienste ausgewählt wurden, und summiert deren Preise
+    private void setupActionListener_Berechnen() {
 
         btn_Berechnen.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-
-                double preis = 0.0;                                              // Gesamtpreis zurücksetzen
-
-                // Dienst 1 (Massage) //
-                if (chk_Dienst1.isSelected()) {                                  // Wenn der Benutzer den Dienst "Massage" ausgewählt hat
-                    String angebot = cbx_Angebot1.getSelectedItem().toString();  // Das ausgewählte Unterangebot (z.B.: "Thai Massage") aus der ComboBox auslesen
-
-                    if (angebot.equals("Thai Massage")) {
-                        preis += 35.0;                                           // Wenn "Thai Massage" gewählt wurde, 35 Euro zum Gesamtpreis hinzufügen
-                    } else if (angebot.equals("Fuß Massage")) {
-                        preis += 40.0;
-                    } else if (angebot.equals("Aromaöl Massage")) {
-                        preis += 25.0;
-                    }
-                }
-
-                // Dienst 2 (Nägel) //
-                if (chk_Dienst2.isSelected()) {
-                    String angebot = cbx_Angebot2.getSelectedItem().toString();
-                    if (angebot.equals("Pediküre")) {
-                        preis += 20.0;
-                    } else if (angebot.equals("Maniküre")) {
-                        preis += 10.0;
-                    } else if (angebot.equals("Nagel Design")) {
-                        preis += 30.0;
-                    } else if (angebot.equals("Nägel auffüllen")) {
-                        preis += 28.0;
-                    } else if (angebot.equals("Nagelmodellage")) {
-                        preis += 30.4;
-                    }
-                }
-
-                // Dienst 3 (Kosmetik) //
-                if (chk_Dienst3.isSelected()) {
-                    String angebot = cbx_Angebot3.getSelectedItem().toString();
-                    if (angebot.equals("Wimpernverlängerung")) {
-                        preis += 80.0;
-                    } else if (angebot.equals("Augenbrauen und Wimpern färben")) {
-                        preis += 15.0;
-                    } else if (angebot.equals("Wimpernwelle")) {
-                        preis += 69.0;
-                    } else if (angebot.equals("Augenbrauen zupfen")) {
-                        preis += 15.0;
-                    }
-                }
-
-                tf_Gesamtpreis.setText(preis + " Euro"); // Gesamtpreis wird in der tf_Gesamtpreis (TextField) angezeigt
+                double preis = berechneGesamtpreis();     // Gesamtpreis berechnen durch Aufruf einer Hilfsmethode
+                tf_Gesamtpreis.setText(preis + " Euro");  // Ergebnis im Textfeld anzeigen (z.B. "80.0 Euro")
             }
         });
+    }
 
-        // SPEICHERN UND ANZEIGEN //
+    public double berechneGesamtpreis() { // Hilfsmethode zur Preisberechnung
+        double preis = 0.0;
+
+        if (chk_Dienst1.isSelected()) {                                   // Wenn Dienst 1 (Massage) ausgewählt ist
+            String angebot = cbx_Angebot1.getSelectedItem().toString();   // Ausgewähltes Angebot aus der ComboBox holen (z.B. "Thai Massage")
+            preis += getPreis("Massage", angebot);               // Preis automatisch aus der Dienst-Liste holen. getPreis(Kategorie, Angebot) durchsucht alle gespeicherten Dienste
+        }
+        if (chk_Dienst2.isSelected()) {
+            String angebot = cbx_Angebot2.getSelectedItem().toString();
+            preis += getPreis("Nägel", angebot);
+        }
+        if (chk_Dienst3.isSelected()) {
+            String angebot = cbx_Angebot3.getSelectedItem().toString();
+            preis += getPreis("Kosmetik", angebot);
+        }
+        return preis; // Rückgabe des Gesamtpreises
+    }
+
+    // ---------------------------------------- //
+    // 5. ACTIONLISTENER: Speichern und Anzeigen //
+    // ---------------------------------------- //
+
+    // Erstellt einen neuen Termin aus Nutzereingaben und fügt ihn zur Tabelle hinzu
+    private void setupActionListener_Speichern() {
 
         btn_Speichern_und_Anzeigen.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
 
-                // EXCEPTION HANDLUNG: Fehlerbehandlung mit try-catch
-
                 try {
-
-                    // Kundennamme //
-
-                    String kundenname = tf_Kundenname.getText().trim();  // Den eingegebenen Namen aus dem Textfeld holen
-
-                    if (kundenname.isEmpty()) {  // Wenn tf_Kundenname leer ist, eine Fehlermeldung auslösen
-                        throw new IllegalArgumentException("Bitte geben Sie einen gültigen Namen ein!");
-                    }
-
-                    if (!kundenname.matches("[a-zA-ZäöüÄÖÜß ]+")) {  // Wenn der Name Zahlen oder Sonderzeichen enthält, Fehler auslösen
-                        throw new IllegalArgumentException("Der Name darf keine Zahlen oder Sonderzeichen erhalten!");
-                    }
-
-                    // Telefonnummer //
-
-                    String telefonnummer = tf_Telefonnummer.getText().trim();  // Telefonnummer aus dem Textfeld holen
-
-                    if (telefonnummer.isEmpty()) { // Wenn tf_Telefonnummer leer ist, ebenfalls Fehler auslösen
-                        throw new IllegalArgumentException("Bitte geben Sie eine gültige Telefonnummer ein!");
-                    }
-
-                    if (!telefonnummer.matches("\\d+")) { // Wenn tf_Telefonnummer hat keine Ziffern, Fehler auslösen
-                        throw new IllegalArgumentException("Die Telefonnumer darf keine Buchstaben oder Sonderzeichen erhalten!");
-                    }
-
-                    List<Dienst> dienstList = new ArrayList<>();                       // Neue Liste für ausgewählte Dienstleistungen erstellen
-
-                    if (chk_Dienst1.isSelected()) {                                    // Wenn Dienst 1 (Massage) ausgewählt ist
-                        String angebot = cbx_Angebot1.getSelectedItem().toString();    // Das ausgewählte Unterangebot (z.B. "Thai Massage") aus der ComboBox holen
-                        double preis = getPreis("Massage", angebot);          // Den Preis für das gewählte Angebot ermitteln
-                        dienstList.add(new Dienst("Massage", angebot, preis));  // Neues Dienst-Objekt erstellen und zur Liste hinzufügen
-                    }
-                    if (chk_Dienst2.isSelected()) {
-                        String angebot = cbx_Angebot2.getSelectedItem().toString();
-                        double preis = getPreis("Nägel", angebot);
-                        dienstList.add(new Dienst("Nägel", angebot, preis));
-                    }
-                    if (chk_Dienst3.isSelected()) {
-                        String angebot = cbx_Angebot3.getSelectedItem().toString();
-                        double preis = getPreis("Kosmetik", angebot);
-                        dienstList.add(new Dienst("Kosmetik", angebot, preis));
-                    }
-
-                    // Dienst-List //
-
-                    if (dienstList.isEmpty()) {    // Wenn keine Dienstleistung ausgewählt wurde, Fehler auslösen
-                        throw new IllegalArgumentException("Bitte wählen Sie mindestens einen Dienst aus.");
-                    }
-
-                    String preisText = tf_Gesamtpreis.getText().trim(); // Gesamtpreis-Text holen und Leerzeichen entfernen (z.B: " 45.0 Euro " = "45.0 Euro")
-
-                    if (preisText.isEmpty()) {    // Wenn kein Preis berechnet wurde, Fehler auslösen
-                        throw new IllegalArgumentException("Bitte berechnen Sie zuerst den Gesamtpreis.");
-
-                    } else {
-                        preisText = preisText.replaceAll("[^\\d]", ""); // Alle nicht-numerischen Zeichen entfernen (z.B. "45.0 Euro" = "45.0")
-                        double preis = Double.parseDouble(preisText);                    // Den Text in eine Zahl vom Typ double umwandeln
-                    }
-
-                    // Datum //
-
-                    Date datum = dateChooser.getDate(); //Ausgewähltes Datum von "JDateChooser" holen
-
-                    if (datum == null) { // Wenn kein Datum gewählt wurde, Fehler auslösen
-                        throw new IllegalArgumentException("Bitte wählen Sie ein Datum aus.");
-                    }
-
-                    LocalDate date = datum.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();  // Umwandlung von Date zu LocalDate (Zum Beispiel: 2025-06-20)
-
-                    Date zeit = (Date) spn_Uhrzeit.getValue();                                        // Uhrzeit aus dem Spinner holen und umwandeln
-                    LocalTime time = zeit.toInstant().atZone(ZoneId.systemDefault()).toLocalTime();   // Umwandlung von Date zu LocalTime (Zum Beispiel: 10:30)
-
-                    LocalDateTime terminZeit = LocalDateTime.of(date, time);                          // Datum und Uhrzeit zu einem LocalDateTime-Objekt kombinieren (Zum Beispiel: 2025-06-20T10:30)
-
-                    // Terminzeit //
-
-                    if (terminZeit.isBefore(LocalDateTime.now())) {
-                        throw new IllegalArgumentException("Termin darf nicht in der Vergangenheit liegen.");   // Keine Termine in der Vergangenheit erlaubt
-                    }
-
-                    for (int i = 0; i < tableModel.getRowCount(); i++) {
+                    Termin termin = erzeugeTerminAusEingaben();           // Neuen Termin basierend auf Benutzereingaben erzeugen
+                    for (int i = 0; i < tableModel.getRowCount(); i++) {  // Prüfen, ob ein anderer Termin am selben Tag zu nah dran liegt (< 45 Minuten)
 
                         String existingDatumStr = tableModel.getValueAt(i, 4).toString();
                         LocalDateTime existingDatum = LocalDateTime.parse(existingDatumStr);
+                        long minutes = Math.abs(Duration.between(existingDatum, termin.getDatum()).toMinutes());
 
-                        if (existingDatum.toLocalDate().equals(terminZeit.toLocalDate())) {  // Prüfen, ob Termin mit ähnlicher Zeit schon existiert
-
-                            long minutes = Math.abs(java.time.Duration.between(existingDatum, terminZeit).toMinutes());
-
-                            if (minutes < 45) { // Wenn zwei Termine weniger als 45 Minuten Abstand haben, ist das nicht erlaubt
-                                throw new IllegalArgumentException("Termin ist zu nah an einem bestehenden Termin (weniger als 45 Minuten Abstand).");
-                            }
+                        if (existingDatum.toLocalDate().equals(termin.getDatum().toLocalDate()) && minutes < 45) {
+                            throw new IllegalArgumentException("Termin ist zu nah an einem bestehenden Termin (weniger als 45 Minuten Abstand).");
                         }
                     }
 
-                    Termin termin = new Termin(kundenname, telefonnummer, dienstList, terminZeit);
-                    verwaltung.addTermin(termin);    // Termin wird gespeichert
+                    verwaltung.addTermin(termin); // Termin wird gespeichert
 
-                    String dienstNamen = "";         // String zur Anzeige der Dienstleistungen vorbereiten
-
-                    for (Dienst d : dienstList) {    // Durch alle gewählten Dienstleistungen des Termins gehen
-                        if (!dienstNamen.isEmpty())
-                            dienstNamen += "\n";     // Zeilenumbruch hinzufügen
-
-                        dienstNamen += d.getDienst() + ": " + d.getAngebot(); // Dienst und Angebot zur Übersicht hinzufügen. Format: (Dienst: Angebot)
+                    // Dienstnamen (als Text mit Zeilenumbrüchen) vorbereiten
+                    String dienstNamen = "";
+                    for (Dienst d : termin.getDienstList()) {
+                        if (!dienstNamen.isEmpty()) dienstNamen += "\n";
+                        dienstNamen += d.getDienst() + ": " + d.getAngebot();
                     }
 
-                    tableModel.addRow(new Object[]{      // Neue Zeile in die Tabelle einfügen (Zeile zeigt alle Informationen zum Termin an)
-
-                            termin.getKundenname(),      // Name des Kunden aus dem Terminobjekt                    (Thao Vy)
-                            termin.getTelefonnummer(),   // Telefonnummer aus dem Terminobjekt                      (015209922581)
-                            dienstNamen,                 // Übersicht über gewählte Dienstleistungen zurückgeben    (Massage: Thai Massage)
-                            termin.getGesamtpreis(),     // Gesamtpreis aller gewählten Dienstleistungen            (35.0)
-                            termin.getDatum().toString() // Terminzeitpunkt als String                              ("2025-05-31T09:30")
+                    // Neue Zeile zur Tabelle hinzufügen
+                    tableModel.addRow(new Object[]{
+                            termin.getKundenname(),
+                            termin.getTelefonnummer(),
+                            dienstNamen,
+                            termin.getGesamtpreis(),
+                            termin.getDatum().toString()
                     });
 
-                } catch(IllegalArgumentException ex) {   // Fehler vom Typ "IllegalArgumentException" abfangen
-                    JOptionPane.showMessageDialog(null, ex.getMessage(), "Fehler", JOptionPane.ERROR_MESSAGE); // Fehlermeldung in einem Dialogfenster anzeigen
+                } catch (IllegalArgumentException ex) {
+                    JOptionPane.showMessageDialog(null, ex.getMessage(), "Fehler", JOptionPane.ERROR_MESSAGE); // Falls Eingabefehler, zeigt Fehlermeldung an
                 }
             }
         });
+    }
 
-        // FILTERN //
+    // Diese Methode liest die Eingaben des Nutzers aus,
+    // prüft sie auf Fehler, und erstellt ein gültiges Termin-Objekt
+    public Termin erzeugeTerminAusEingaben() {
 
+        String kundenname = tf_Kundenname.getText().trim();
+        if (kundenname.isEmpty() || !kundenname.matches("[a-zA-ZäöüÄÖÜß ]+"))                         //Wenn tf_Kundenname leer ist und der Name Zahlen oder Sonderzeichen enthält, Fehlermeldung auslösen
+            throw new IllegalArgumentException("Bitte geben Sie einen gültigen Namen ein!");
+
+        String telefonnummer = tf_Telefonnummer.getText().trim();
+        if (telefonnummer.isEmpty() || !telefonnummer.matches("\\d+"))                               // Wenn tf_Telefonnummer leer ist und keine Ziffern hat, Fehler auslösen
+            throw new IllegalArgumentException("Bitte geben Sie eine gültige Telefonnummer ein!");
+
+        List<Dienst> dienstList = new ArrayList<>();                                                       // Neue Liste für ausgewählte Dienstleistungen erstellen
+        if (chk_Dienst1.isSelected()) {                                                                    // Wenn Dienst 1 (Massage) ausgewählt ist
+            String angebot = cbx_Angebot1.getSelectedItem().toString();                                    // Das ausgewählte Unterangebot (z.B. "Thai Massage") aus der ComboBox holen
+            dienstList.add(new Dienst("Massage", angebot, getPreis("Massage", angebot)));  // Neues Dienst-Objekt erstellen und zur Liste hinzufügen
+        }
+        if (chk_Dienst2.isSelected()) {
+            String angebot = cbx_Angebot2.getSelectedItem().toString();
+            dienstList.add(new Dienst("Nägel", angebot, getPreis("Nägel", angebot)));
+        }
+        if (chk_Dienst3.isSelected()) {
+            String angebot = cbx_Angebot3.getSelectedItem().toString();
+            dienstList.add(new Dienst("Kosmetik", angebot, getPreis("Kosmetik", angebot)));
+        }
+
+        if (dienstList.isEmpty())                                                                        // Wenn keine Dienstleistung ausgewählt wurde, Fehler auslösen
+            throw new IllegalArgumentException("Bitte wählen Sie mindestens einen Dienst aus.");
+
+        String preisText = tf_Gesamtpreis.getText().trim().replaceAll("[^\\d.]", "");  // Gesamtpreis-Text holen und Leerzeichen entfernen, nur Zahlen und Dezimalpunkt behalten (z.B. " 45.0 Euro " = "45.0")
+        if (preisText.isEmpty())                                                                         // Wenn kein Preis berechnet wurde, Fehler auslösen
+            throw new IllegalArgumentException("Bitte berechnen Sie zuerst den Gesamtpreis.");
+        double preis = Double.parseDouble(preisText);                                                    // Preis-Text in eine Zahl (double) umwandeln (z.B. "45.0" = 45.0)
+
+        Date datum = dateChooser.getDate();                                         // Ausgewähltes Datum von "JDateChooser" holen
+        if (datum == null)                                                          // Wenn kein Datum gewählt wurde, Fehler auslösen
+            throw new IllegalArgumentException("Bitte wählen Sie ein Datum aus.");
+
+        LocalDate date = datum.toInstant().atZone(ZoneId.systemDefault()).toLocalDate(); // Umwandlung von Date zu LocalDate (Zum Beispiel: 2025-06-20)
+        Date zeit = (Date) spn_Uhrzeit.getValue();                                       // Uhrzeit aus dem Spinner holen und umwandeln
+        LocalTime time = zeit.toInstant().atZone(ZoneId.systemDefault()).toLocalTime();  // Umwandlung von Date zu LocalTime (Zum Beispiel: 10:30)
+        LocalDateTime terminZeit = LocalDateTime.of(date, time);                         // Datum und Uhrzeit zu einem LocalDateTime-Objekt kombinieren (z.B. 2025-06-20T10:30)
+
+        if (terminZeit.isBefore(LocalDateTime.now()))
+            throw new IllegalArgumentException("Termin darf nicht in der Vergangenheit liegen."); // Keine Termine in der Vergangenheit erlaubt
+
+        return new Termin(kundenname, telefonnummer, dienstList, terminZeit); // Termin-Objekt mit allen Daten zurückgeben
+    }
+
+    // -------------------------- //
+    // 6. ACTIONLISTENER: Filtern //
+    // -------------------------- //
+
+    private void setupActionListener_Filtern() {
         btn_Filtern.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                String filterText = tf_Filtern.getText().trim().toLowerCase(); // Text aus dem Filter-Textfeld holen, Leerzeichen entfernen und in Kleinbuchstaben umwandeln
+                filterTabelle(filterText);                                     // Tabelle anhand des Filtertexts neu laden
+            }
+        });
+    }
 
-                String filterText = tf_Filtern.getText().trim().toLowerCase(); // Daten aus dem Eingabefeld (tf_Filtern) holen (Leerzeichen entfernen, in Kleinbuchstaben umwandeln)
-                tableModel.setRowCount(0); // Alle aktuellen Zeilen aus der Tabelle löschen
+    // Tabelle filtern und neu aufbauen
+    public void filterTabelle(String filterText) {
 
-                List<Termin> alleTermine = verwaltung.getAlleTermine(); // Gesamte Terminliste von der Verwaltung abrufen
+        tableModel.setRowCount(0);                             // Alle bisherigen Zeilen aus der Tabelle löschen
+        for (Termin t : verwaltung.getAlleTermine()) {         // Alle gespeicherten Termine durchgehen
+            if (filterText.isEmpty()
+                    || t.getKundenname().toLowerCase().contains(filterText)
+                    || t.getTelefonnummer().toLowerCase().contains(filterText)) {
 
-                for (Termin t : alleTermine) {  // Durch alle Termine iterieren
-
-                    if (filterText.isEmpty()
-                            || t.getKundenname().toLowerCase().contains(filterText)
-                            || t.getTelefonnummer().toLowerCase().contains(filterText))
-
-                    /* Termin wird angezeigt, wenn mindestens eine der folgenden Bedingungen erfüllt ist:
+                /* Termin wird angezeigt, wenn mindestens eine der folgenden Bedingungen erfüllt ist:
                      - Das Filterfeld ist leer
                      - Der Kundenname enthält den Filtertext
                      - Die Telefonnummer enthält den Filtertext */
 
-                    {
-
-                        String dienstNamen = "";
-
-                        for (Dienst d : t.getDienstList()) {
-
-                            if (!dienstNamen.isEmpty())
-                                dienstNamen += "\n";
-
-                                dienstNamen += d.getDienst() + ": " + d.getAngebot();
-                        }
-
-                        tableModel.addRow(new Object[] {
-                                t.getKundenname(),
-                                t.getTelefonnummer(),
-                                dienstNamen.toString(),
-                                t.getGesamtpreis(),
-                                t.getDatum().toString()
-                        });
-                    }
+                String dienstNamen = "";
+                for (Dienst d : t.getDienstList()) {
+                    if (!dienstNamen.isEmpty()) dienstNamen += "\n";
+                    dienstNamen += d.getDienst() + ": " + d.getAngebot();
                 }
-            }
-        });
 
-        ladeInitialTermine(); // Lädt alle gespeicherten Termine aus der TerminVerwaltung und zeigt sie in der Tabelle an
+                tableModel.addRow(new Object[]{
+                        t.getKundenname(),
+                        t.getTelefonnummer(),
+                        dienstNamen,
+                        t.getGesamtpreis(),
+                        t.getDatum().toString()
+                });
+            }
+        }
     }
 
     // ---------------------------------------------------//
-    // 5. HILFSMETHODEN: Daten laden und Preis ermitteln  //
+    // 7. HILFSMETHODEN: Daten laden und Preis ermitteln  //
     // ---------------------------------------------------//
 
-    private void ladeInitialTermine() {  // Methode zum Laden der gespeicherten Termine und Einfügen in die Tabelle
+    // Methode zum Laden der gespeicherten Termine und Einfügen in die Tabelle
+    private void ladeInitialTermine() {
 
         if (!initialisiert) {            // Wenn die Termine noch nicht geladen wurden
             verwaltung.initObjekte();    // Beispieltermine in die Verwaltung laden
             initialisiert = true;        // Nur einmal laden
         }
 
-        for (Termin t : verwaltung.getAlleTermine()) {   // Alle Termine durchlaufen und in die Tabelle einfügen
-
+        for (Termin t : verwaltung.getAlleTermine()) {
             String dienstNamen = "";
-
             for (Dienst d : t.getDienstList()) {
-                if (!dienstNamen.isEmpty()) {
-                    dienstNamen += "\n";
-                }
+                if (!dienstNamen.isEmpty()) dienstNamen += "\n";
                 dienstNamen += d.getDienst() + ": " + d.getAngebot();
             }
 
@@ -423,14 +349,79 @@ public class iBeautyFenster extends JFrame{
         }
     }
 
-    public double getPreis(String kategorie, String angebot) { // Methode zum Ermitteln des Preises anhand Kategorie + Angebot
-
-        for (Dienst d : Dienst.getAlleAngebot()) { // Alle verfügbaren Angebote durchsuchen
-
-            if (d.getDienst().equals(kategorie) && d.getAngebot().equals(angebot)) { // Wenn Kategorie und Angebot übereinstimmen, Preis zurückgeben
+    // Methode zum Ermitteln des Preises anhand Kategorie + Angebot
+    public double getPreis(String kategorie, String angebot) {
+        for (Dienst d : Dienst.getAlleAngebot()) {
+            if (d.getDienst().equals(kategorie) && d.getAngebot().equals(angebot)) {
                 return d.getPreis();
             }
         }
         return 0.0;
     }
+
+    // --------------------------------------------------------------------//
+    // 8. HILFSMETHODEN: Getter-Methoden zur Unterstützung von Unit-Tests  //
+    // --------------------------------------------------------------------//
+
+    // Getter für Textfelder
+    public JTextField getTf_Kundenname() {
+        return tf_Kundenname;
+    }
+
+    public JTextField getTf_Telefonnummer() {
+        return tf_Telefonnummer;
+    }
+
+    public JTextField getTf_Gesamtpreis() {
+        return tf_Gesamtpreis;
+    }
+
+    public JTextField getTf_Filtern() {
+        return tf_Filtern;
+    }
+
+    // Getter für Checkboxen
+    public JCheckBox getChk_Dienst1() {
+        return chk_Dienst1;
+    }
+
+    public JCheckBox getChk_Dienst2() {
+        return chk_Dienst2;
+    }
+
+    public JCheckBox getChk_Dienst3() {
+        return chk_Dienst3;
+    }
+
+    // Getter für ComboBoxen
+    public JComboBox getCbx_Angebot1() {
+        return cbx_Angebot1;
+    }
+
+    public JComboBox getCbx_Angebot2() {
+        return cbx_Angebot2;
+    }
+
+    public JComboBox getCbx_Angebot3() {
+        return cbx_Angebot3;
+    }
+
+    // Getter für Kalender und Uhrzeit
+    public JDateChooser getDateChooser() {
+        return dateChooser;
+    }
+
+    public JSpinner getSpn_Uhrzeit() {
+        return spn_Uhrzeit;
+    }
+
+    // Getter für Tabelle und Verwaltung
+    public DefaultTableModel getTableModel() {
+        return tableModel;
+    }
+
+    public TerminVerwaltung getVerwaltung() {
+        return verwaltung;
+    }
+
 }
