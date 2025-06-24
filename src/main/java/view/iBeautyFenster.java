@@ -64,17 +64,38 @@ public class iBeautyFenster extends JFrame {
 
     public iBeautyFenster() {
 
-            setTitle("iBeauty Manager");                     // Đặt tên tiêu đề cửa sổ
-            setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);  // Khi nhấn dấu “X” đóng cửa sổ, chương trình sẽ thoát
-            setExtendedState(JFrame.MAXIMIZED_BOTH);         // Cửa sổ mở toàn màn hình
-            setContentPane(myPanel);                         // Dùng myPanel đã thiết kế trong GUI Designer làm nội dung chính.
-            setVisible(true);                                // Hiển thị cửa sổ (bắt buộc để thấy giao diện)
+        setTitle("iBeauty Manager");                     // Den Fenstertitel setzen
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);  // Wenn auf das "X" geklickt wird, wird das Programm beendet
+        setExtendedState(JFrame.MAXIMIZED_BOTH);         // Fenster wird im Vollbildmodus geöffnet
+        setContentPane(myPanel);                         // Verwendet das im GUI Designer gestaltete myPanel als Hauptinhalt
+        setVisible(true);                                // Fenster anzeigen
 
         setupDatum_Uhrzeit_Tabelle();    // Datum, Uhrzeit und Tabelle vorbereiten
         setupActionListener_Berechnen(); // ActionListener für "Berechnen"-Button
         setupActionListener_Speichern(); // ActionListener für "Speichern"-Button
         setupActionListener_Filtern();   // ActionListener für "Filtern"-Button
         ladeInitialTermine();            // Beispieltermine laden und anzeigen
+    }
+
+    /* Alternative Konstruktor mit Steuerung, ob Beispieldaten geladen werden sollen.
+     * Wird beim Unit-Test verwendet, um das Fenster ohne initiale Daten zu öffnen.
+     * true = Beispieldaten werden geladen, false = leeres Fenster */
+
+    public iBeautyFenster(boolean ladeInitial) {
+        setTitle("iBeauty Manager");
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setExtendedState(JFrame.MAXIMIZED_BOTH);
+        setContentPane(myPanel);
+        setVisible(true);
+
+        setupDatum_Uhrzeit_Tabelle();
+        setupActionListener_Berechnen();
+        setupActionListener_Speichern();
+        setupActionListener_Filtern();
+
+        if (ladeInitial) {
+            ladeInitialTermine();
+        }
     }
 
     // ------------------------------------------ //
@@ -265,11 +286,14 @@ public class iBeautyFenster extends JFrame {
             throw new IllegalArgumentException("Bitte wählen Sie ein Datum aus.");
 
         LocalDate date = datum.toInstant().atZone(ZoneId.systemDefault()).toLocalDate(); // Umwandlung von Date zu LocalDate (Zum Beispiel: 2025-06-20)
-        Date zeit = (Date) spn_Uhrzeit.getValue();                                       // Uhrzeit aus dem Spinner holen und umwandeln
-        LocalTime time = zeit.toInstant().atZone(ZoneId.systemDefault()).toLocalTime();  // Umwandlung von Date zu LocalTime (Zum Beispiel: 10:30)
+        Date zeit = (Date) spn_Uhrzeit.getValue();
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(zeit);
+        LocalTime time = LocalTime.of(cal.get(Calendar.HOUR_OF_DAY), cal.get(Calendar.MINUTE));  // Umwandlung von Date zu LocalTime (Zum Beispiel: 10:30)
         LocalDateTime terminZeit = LocalDateTime.of(date, time);                         // Datum und Uhrzeit zu einem LocalDateTime-Objekt kombinieren (z.B. 2025-06-20T10:30)
+        LocalDateTime jetzt = LocalDateTime.now().withSecond(0).withNano(0);
 
-        if (terminZeit.isBefore(LocalDateTime.now()))
+        if (terminZeit.isBefore(jetzt))
             throw new IllegalArgumentException("Termin darf nicht in der Vergangenheit liegen."); // Keine Termine in der Vergangenheit erlaubt
 
         return new Termin(kundenname, telefonnummer, dienstList, terminZeit); // Termin-Objekt mit allen Daten zurückgeben
@@ -424,4 +448,7 @@ public class iBeautyFenster extends JFrame {
         return verwaltung;
     }
 
+    public JTable getTb_Termin_Uebersicht() {
+        return tb_Termin_Uebersicht;
+    }
 }
