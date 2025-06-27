@@ -47,7 +47,8 @@ cd iBeautyManager
 ---
 
 ## Unser Video 
-[👉 Video ansehen](#) *(Link wird später aktualisiert)*
+
+[![Video ansehen](src/main/resources/fotos/iBeautyThumbnail.png)](https://vimeo.com/1096825142/3e5653cadb?share=copy)
 
 ---
 
