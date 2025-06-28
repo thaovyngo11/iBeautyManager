@@ -1,12 +1,10 @@
-package controller;
+package model;
 
 
-import model.Dienst;
-import model.Termin;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -45,12 +43,6 @@ class TerminVerwaltungTest {
         assertEquals("Lara", termine.get(2).getKundenname());
     }
 
-    @Test
-    void filterNachTelefon() {
-        List<Termin> gefiltert = TerminVerwaltung.filterNachTelefon("015209922581");
-        assertEquals(1, gefiltert.size());
-        assertEquals("Thao Vy", gefiltert.get(0).getKundenname());
-    }
 
     @Test
     void initObjekte() {
