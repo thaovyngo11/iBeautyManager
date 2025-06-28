@@ -30,15 +30,6 @@ import java.util.List;
             return new ArrayList<>(termine);
         }
 
-        public static List<Termin> filterNachTelefon(String telefonnummer) {
-            List<Termin> gefiltert = new ArrayList<>();
-            for (Termin t : termine) {
-                if (t.getTelefonnummer().equalsIgnoreCase(telefonnummer)) {
-                    gefiltert.add(t);
-                }
-            }
-            return gefiltert;
-        }
 
         public static void initObjekte() {
             termine.clear();
